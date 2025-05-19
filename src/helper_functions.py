@@ -20,7 +20,7 @@ def exponential_kernel(kernel_params, t):
 
 def power_law_kernel(kernel_params, t):
     alpha, beta = kernel_params
-    return alpha * (t ** (-beta))
+    return alpha / (t ** (beta))
 
 def rayleigh_kernel(kernel_params, t):
     alpha, beta = kernel_params

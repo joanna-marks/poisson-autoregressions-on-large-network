@@ -30,9 +30,9 @@ def save_results(lmbd_comb, lmbd_comb_exp, lmbd_mf,T, comm_size1, comm_size2, pr
     metadata = {
         'timestamp': timestamp,
         'final time': T,
-        'num_nodes1': comm_size1.sum(),
-        'num_nodes2': comm_size2.sum(),
-        'alphas': comm_size1 / comm_size1.sum(),
+        'num_nodes1': np.sum(comm_size1),
+        'num_nodes2': np.sum(comm_size2),
+        'alphas': comm_size1 / np.sum(comm_size1),
         'num_communities': len(comm_size1),
         'kernel_function': kernel_function,
         'kernel_parameters': kernel_parameters,
