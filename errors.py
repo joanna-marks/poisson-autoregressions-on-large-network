@@ -13,7 +13,7 @@ from src.saving import load_results
 
 
 
-results_dir = "results/1000_10000_20250531_141256_20250531_141256"
+results_dir = "results/500_5000_20250630_175543_20250630_175543"
 lmbd_comb = np.load(f"{results_dir}/lmbd_1000.npy")
 lmbd_comb_exp = np.load(f"{results_dir}/lmbd_10000.npy")
 lmbd_mf = np.load(f"{results_dir}/lmbd_mf_1000.npy")
@@ -30,6 +30,7 @@ def compute_error_per_community(lmbd, lmbd_mf, comm_sizes):
         error_per_comm.append(np.mean(lmbd[:, start:end] - lmbd_mf[:, start:end]))
         start = end
     return error_per_comm
+
 
 start_idx = 0
 lmbd_mf = np.zeros_like(lmbd_comb)
@@ -50,12 +51,16 @@ error_comb_exp = np.abs(lmbd_comb_exp[:,0] - lmbd_mf_exp[:,0]).mean()
 error_aux = np.mean(np.abs(lmbd_aux - lmbd_mf))
 error_aux_exp = np.mean(np.abs(lmbd_aux_exp - lmbd_mf_exp))
 
+error = np.abs(lmbd_comb[-1,:] - lmbd_mf[-1,:]).mean()
+error_exp = np.abs(lmbd_comb_exp[-1,:] - lmbd_mf_exp[-1,:]).mean()
+
 error_comb_per_comm = compute_error_per_community(lmbd_comb, lmbd_mf, comm_size1)
 error_comb_exp_per_comm = compute_error_per_community(lmbd_comb_exp, lmbd_mf_exp, comm_size2)
 error_aux_per_comm = compute_error_per_community(lmbd_aux, lmbd_mf, comm_size1)
 error_aux_exp_per_comm = compute_error_per_community(lmbd_aux_exp, lmbd_mf_exp, comm_size2)
 
-
+print("Error (Combined):", error)
+print("Error (Combined Exp):", error_exp)
 print("Error (Combined):", error_comb)
 print("Error (Combined Exp):", error_comb_exp)
 print("Error (Aux):", error_aux)

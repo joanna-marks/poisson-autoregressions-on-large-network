@@ -10,12 +10,10 @@ if src_dir not in sys.path:
 
 from src.synthetic_data import generate_sbm_adjacency_matrix, expand_adjacency_matrix
 from src.config import final_time, num_nodes1, num_nodes2, comm_size1, comm_size2, prob_matrix, kernel_function_matrix, kernel_params_matrix
-from src.simulation import simulate_comb_sbm, simulate_mf_sbm, simulate_aux_sbm
+from src.simulation import simulate_comb_sbm, simulate_mf_sbm, simulate_aux_sbm, simulate_comb_sbm_optimized
 from src.saving import save_results
 
-
-
-E = np.random.exponential(scale = 1.0, size = (final_time, num_nodes1, 20))
+E = np.random.exponential(scale = 1.0, size = (final_time, num_nodes1, 100))
 labs, G = generate_sbm_adjacency_matrix(comm_size1, prob_matrix)
 
 N_comb, lmbd_comb ,X_comb = simulate_comb_sbm(E, final_time,num_nodes1,comm_size1, kernel_function_matrix, kernel_params_matrix, G, labs)
@@ -23,7 +21,7 @@ N_aux, lmbd_aux ,X_aux = simulate_aux_sbm(E, final_time,num_nodes1,comm_size1, k
 N_mf, lmbd_mf, X_mf = simulate_mf_sbm(E, final_time, comm_size1, prob_matrix, kernel_function_matrix, kernel_params_matrix)
 print(f"Simulation for {num_nodes1} completed.")
 
-E = np.random.exponential(scale = 1.0, size = (final_time, num_nodes2, 20))
+E = np.random.exponential(scale = 1.0, size = (final_time, num_nodes2, 100))
 #labs, G_exp = generate_sbm_adjacency_matrix(comm_size2, prob_matrix)
 labs_exp, G_exp = expand_adjacency_matrix(labs, G, comm_size1, comm_size2, prob_matrix)
 

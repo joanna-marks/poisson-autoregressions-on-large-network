@@ -16,8 +16,7 @@ from src.helper_functions import exponential_kernel
 
 kernel_function = exponential_kernel
 
-
-final_time = 100
+num_nodes =50
 two_norms_comb = []
 infinity_norms_comb = []
 two_norms_aux = []
@@ -26,7 +25,7 @@ mean_distances_lmbd = []
 mean_distances_X = []
 max_iter = 1000
 min_iter = 100
-iter_by= 10
+iter_by= 50
 
 range_values = np.arange(min_iter, max_iter, iter_by)
 
@@ -42,27 +41,23 @@ mean_distances_X_all = [[] for _ in range(num_graphs)]
 
 for graph_idx in range(num_graphs):
     print(f"\nGraph Realization {graph_idx + 1}/{num_graphs}")
-    num_nodes = min_iter
-    comm_size_prev = (num_nodes * alphas).astype(int)
-    num_nodes = np.sum(comm_size_prev)
-    labs, G = generate_sbm_adjacency_matrix(comm_size_prev, prob_matrix)
+    final_time = min_iter
+    comm_size = (num_nodes * alphas).astype(int)
+    labs, G = generate_sbm_adjacency_matrix(comm_size, prob_matrix)
 
     for value in tqdm(range_values, desc=f"Graph {graph_idx+1} progress"):
-        num_nodes = value
-        comm_size_new = (num_nodes * alphas).astype(int)
-        num_nodes = np.sum(comm_size_new)
+        final_time = value
 
         E = np.random.exponential(scale=1.0, size=(final_time, num_nodes, 50))
-        labs, G = expand_adjacency_matrix(labs, G, comm_size_prev, comm_size_new, prob_matrix)
 
         # Base simulations
-        N_aux, lmbd_aux, X_aux = simulate_aux_sbm(E, final_time, num_nodes, comm_size_new, kernel_function_matrix, kernel_params_matrix, G, labs)
-        N_mf, lmbd_mf, X_mf = simulate_mf_sbm(E, final_time, comm_size_new, prob_matrix, kernel_function_matrix, kernel_params_matrix)
+        N_aux, lmbd_aux, X_aux = simulate_aux_sbm(E, final_time, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs)
+        N_mf, lmbd_mf, X_mf = simulate_mf_sbm(E, final_time, comm_size, prob_matrix, kernel_function_matrix, kernel_params_matrix)
 
         # Expand MF
         lmbd_mf_expanded = np.zeros((final_time, num_nodes))
         start_idx = 0
-        for i, size in enumerate(comm_size_new):
+        for i, size in enumerate(comm_size):
             lmbd_mf_expanded[:, start_idx:start_idx + size] = np.tile(lmbd_mf[:, i].reshape(-1, 1), size)
             start_idx += size
 
@@ -74,8 +69,8 @@ for graph_idx in range(num_graphs):
 
         for _ in range(100):
             E = np.random.exponential(scale=1.0, size=(final_time, num_nodes, 15))
-            _, lmbd_comb_new, X_comb_new = simulate_comb_sbm(E, final_time, num_nodes, comm_size_new, kernel_function_matrix, kernel_params_matrix, G, labs)
-            _, lmbd_mf_new, X_mf_new = simulate_mf_sbm(E, final_time, comm_size_new, prob_matrix, kernel_function_matrix, kernel_params_matrix)
+            _, lmbd_comb_new, X_comb_new = simulate_comb_sbm(E, final_time, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs)
+            _, lmbd_mf_new, X_mf_new = simulate_mf_sbm(E, final_time, comm_size, prob_matrix, kernel_function_matrix, kernel_params_matrix)
             final_time_lmbd_comb_new = lmbd_comb_new[-1, :]
             final_time_X_comb_new = X_comb_new[-1, :]
             final_time_lmbd_mf_new = lmbd_mf_new[-1,:]
@@ -111,13 +106,11 @@ for graph_idx in range(num_graphs):
         mean_distances_lmbd_all[graph_idx].append(mean_dist_lmbd)
         mean_distances_X_all[graph_idx].append(mean_dist_X)
 
-        comm_size_prev = comm_size_new
-
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(timestamp)
 
-results_dir = f"results/N_dep_{timestamp}"
+results_dir = f"results/T_dep_{timestamp}"
 os.makedirs(results_dir, exist_ok=True)
 
 np.save(f"{results_dir}/two_norms_comb.npy", two_norms_comb_all)

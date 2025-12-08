@@ -12,7 +12,7 @@ from src.config import alphas, num_nodes1, num_nodes2
 from src.saving import load_results
 
 
-results_dir = "results/500_5000_20250613_105825_20250613_105825"
+results_dir = "results/500_5000_dissociative"
 lmbd_comb = np.load(f"{results_dir}/lmbd_1000.npy")
 lmbd_comb_exp = np.load(f"{results_dir}/lmbd_10000.npy")
 lmbd_mf = np.load(f"{results_dir}/lmbd_mf_1000.npy")
