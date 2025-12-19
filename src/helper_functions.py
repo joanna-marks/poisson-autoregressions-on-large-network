@@ -179,6 +179,9 @@ def phi_param_vector_to_tensor(phi_vec, num_comm, p):
     return phi_tensor
 
 
+
+
+
 # import matplotlib.pyplot as plt
 
 # # # Time grid
