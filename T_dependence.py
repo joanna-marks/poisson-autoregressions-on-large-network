@@ -38,8 +38,11 @@ two_norms_aux_all = [[] for _ in range(num_graphs)]
 infinity_norms_aux_all = [[] for _ in range(num_graphs)]
 mean_distances_lmbd_all = [[] for _ in range(num_graphs)]
 mean_distances_X_all = [[] for _ in range(num_graphs)]
+max_distances_X_all =  [[] for _ in range(num_graphs)]
+max_distances_lmbd_all =  [[] for _ in range(num_graphs)]
 
 for graph_idx in range(num_graphs):
+    np.random.seed(graph_idx * 1000)
     print(f"\nGraph Realization {graph_idx + 1}/{num_graphs}")
     final_time = min_iter
     comm_size = (num_nodes * alphas).astype(int)
@@ -54,7 +57,7 @@ for graph_idx in range(num_graphs):
         N_aux, lmbd_aux, X_aux = simulate_aux_sbm(E, final_time, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs)
         N_mf, lmbd_mf, X_mf = simulate_mf_sbm(E, final_time, comm_size, prob_matrix, kernel_function_matrix, kernel_params_matrix)
 
-        # Expand MF
+        # E
         lmbd_mf_expanded = np.zeros((final_time, num_nodes))
         start_idx = 0
         for i, size in enumerate(comm_size):
@@ -67,7 +70,9 @@ for graph_idx in range(num_graphs):
         lmbd_mf_list = []
         X_mf_list = []
 
-        for _ in range(100):
+        i=0
+        for i in range(100):
+            np.random.seed(graph_idx * 1000 + i)
             E = np.random.exponential(scale=1.0, size=(final_time, num_nodes, 15))
             _, lmbd_comb_new, X_comb_new = simulate_comb_sbm(E, final_time, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs)
             _, lmbd_mf_new, X_mf_new = simulate_mf_sbm(E, final_time, comm_size, prob_matrix, kernel_function_matrix, kernel_params_matrix)
@@ -79,6 +84,7 @@ for graph_idx in range(num_graphs):
             X_comb_list.append(final_time_X_comb_new)
             lmbd_mf_list.append(final_time_lmbd_mf_new)
             X_mf_list.append(final_time_X_lmbd_mf_new)
+            i+= 1
 
         lmbd_mean_comb= np.mean(np.stack(lmbd_comb_list) - lmbd_aux[-1, :], axis=0)
         lmbd_comb_arr = np.stack(lmbd_comb_list) 
@@ -95,8 +101,10 @@ for graph_idx in range(num_graphs):
         two_norm_aux = np.linalg.norm(lmbd_aux[-1, :] - lmbd_mf_expanded[-1, :], ord=2) / final_time
         infinity_norm_aux = np.linalg.norm(lmbd_aux[-1, :] - lmbd_mf_expanded[-1, :], ord=np.inf)
 
-        mean_dist_lmbd = np.mean(np.mean(lmbd_diff, axis = 0))
-        mean_dist_X = np.mean(np.mean(X_diff_mf, axis = 0))
+        mean_dist_lmbd = np.mean(np.mean(lmbd_diff, axis = 1))
+        mean_dist_X = np.mean(np.mean(X_diff_mf, axis = 1))
+        max_dist_X = np.max(np.mean(X_diff_mf, axis = 1))
+        max_dist_lmbd = np.max(np.mean(lmbd_diff, axis = 1))
 
         # Store for this graph realization
         two_norms_comb_all[graph_idx].append(two_norm_comb)
@@ -105,6 +113,8 @@ for graph_idx in range(num_graphs):
         infinity_norms_aux_all[graph_idx].append(infinity_norm_aux)
         mean_distances_lmbd_all[graph_idx].append(mean_dist_lmbd)
         mean_distances_X_all[graph_idx].append(mean_dist_X)
+        max_distances_X_all[graph_idx].append(max_dist_X)
+        max_distances_lmbd_all[graph_idx].append(max_dist_lmbd)
 
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -119,6 +129,11 @@ np.save(f"{results_dir}/two_norms_aux.npy", two_norms_aux_all)
 np.save(f"{results_dir}/infty_norms_aux.npy", infinity_norms_aux_all)
 np.save(f"{results_dir}/mean_distances.npy", mean_distances_lmbd_all)
 np.save(f"{results_dir}/mean_distances_X.npy", mean_distances_X_all)
+np.save(f"{results_dir}/max_distances.npy", max_distances_lmbd_all)
+np.save(f"{results_dir}/max_distances_X.npy", max_distances_X_all)
+
+
+
 
 
 
