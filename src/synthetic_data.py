@@ -1,7 +1,6 @@
 import numpy as np
 
 def generate_sbm_adjacency_matrix(community_sizes, probability_matrix):
-    np.random.seed(123)
 
     # Calculate the total number of nodes
     num_nodes = sum(community_sizes)
@@ -19,7 +18,6 @@ def generate_sbm_adjacency_matrix(community_sizes, probability_matrix):
 
 
 def expand_adjacency_matrix(labs, adj_matrix, comm_sizes_before, comm_sizes_after, prob_matrix):
-    np.random.seed(123)
     # Verify input
     if len(comm_sizes_before) != len(comm_sizes_after):
         raise ValueError("Community count must be the same before and after expansion")

@@ -1,11 +1,11 @@
 import numpy as np
-from helper_functions import psi, poisson_randomness, poisson_randomness_vectorized
+from src.helper_functions import psi, poisson_randomness, poisson_randomness_vectorized
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 
 
 #Simulating Hawkes with SBM structure
-def simulate_comb_sbm(E, T, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs, mu_vector = np.array([0.5, 0.5, 0.5]), lag = None):
+def simulate_comb_sbm(E, T, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs, mu_vector = np.array([0.5, 0.5,0.5]), lag = None):
     num_comm = len(comm_size)
     t_values = np.arange(T, 0, -1)
 
@@ -104,7 +104,7 @@ def simulate_comb_sbm_optimized(
     return N, lmbd, X
 
 
-def simulate_aux_sbm(E, T, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs,  mu_vector = np.array([0.5, 0.5, 0.5])):
+def simulate_aux_sbm(E, T, num_nodes, comm_size, kernel_function_matrix, kernel_params_matrix, G, labs,  mu_vector = np.array([0.5, 0.5,0.5])):
     num_comm = len(comm_size)
     t_values = np.arange(T, 0, -1)
 
@@ -141,7 +141,7 @@ def simulate_aux_sbm(E, T, num_nodes, comm_size, kernel_function_matrix, kernel_
 
 
 
-def simulate_mf_sbm(E, T, comm_size, prob_matrix, kernel_function_matrix, kernel_params_matrix, mu_vector = np.array([0.5, 0.5, 0.5]), lag = None):
+def simulate_mf_sbm(E, T, comm_size, prob_matrix, kernel_function_matrix, kernel_params_matrix, mu_vector = np.array([0.5, 0.5,0.5]), lag = None):
     num_comm = len(comm_size)
     num_nodes = np.sum(comm_size)
     alphas = comm_size/np.sum(comm_size)
@@ -170,12 +170,15 @@ def simulate_mf_sbm(E, T, comm_size, prob_matrix, kernel_function_matrix, kernel
         for j in range(num_comm):
             lmbd[i, j] = psi(mu_vector[j] + np.dot(alphas* prob_matrix[:,j], np.sum(kernel_values[T-i:,:] * lmbd[:i,:], axis = 0)))
             size = comm_size[j]
+            start_idx = np.sum(comm_size[:j])
+            #print(f"Community{j}")
+            #print(f"Start index{start_idx}")
 
             for k in range(size):
                 # Simulate the Poisson process for the current time step
-                X[i,k] = poisson_randomness(lmbd[i,j],  E[i, k, :])
+                X[i,start_idx + k] = poisson_randomness(lmbd[i,j],  E[i, start_idx + k, :])
             
                 # Update the cumulative count of events
                 N[i,k] = N[i - 1, k] + X[i, k]
 
-    return N, lmbd, X, kernel_values
+    return N, lmbd, X
